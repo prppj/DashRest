@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Pedidos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --text-color: #2c3e50;
+            --border-color: #bdc3c7;
+        }
+
+        body {
+            background-color: #f5f6fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .status-col {
+            min-height: 400px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .order-card:hover {
+            background-color: var(--light-color);
+        }
+
+        .status-aberto { border-left: 4px solid var(--warning-color); }
+        .status-producao { border-left: 4px solid var(--accent-color); }
+        .status-entrega { border-left: 4px solid var(--success-color); }
+        .status-finalizado { border-left: 4px solid var(--secondary-color); }
+
+        #loginScreen {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .login-card {
+            max-width: 400px;
+            width: 100%;
+            padding: 2rem;
+        }
+
+        .profile-dropdown {
+            min-width: 200px;
+        }
+
+        .profile-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .profile-body {
+            padding: 1rem;
+        }
+
+        .profile-footer {
+            padding: 0.5rem 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Navbar melhorada */
+        .navbar {
+            padding: 0.5rem 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        /* Cards de resumo melhorados */
+        .summary-card {
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .summary-card .card-body {
+            padding: 1.25rem;
+        }
+
+        .summary-card .card-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-card .display-6 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 0;
+        }
+
+        /* Colunas de status melhoradas */
+        .status-column {
+            height: calc(100vh - 250px);
+            min-height: 400px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .status-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            background: #f8f9fa;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .status-header h5 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        /* Cards de pedido melhorados */
+        .order-card {
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .order-card:hover {
+            background-color: #f8f9fa;
+            border-color: var(--accent-color);
+        }
+
+        .order-card .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .order-card .order-number {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .order-card .order-time {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .order-card .order-customer {
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .order-card .order-total {
+            font-weight: 600;
+            color: var(--success-color);
+        }
+
+        /* Responsividade melhorada */
+        @media (max-width: 768px) {
+            .container-fluid {
+                padding: 0.5rem;
+            }
+
+            .status-column {
+                height: auto;
+                min-height: 300px;
+                margin-bottom: 1rem;
+            }
+
+            .summary-card {
+                margin-bottom: 1rem;
+            }
+
+            .navbar-brand {
+                font-size: 1.1rem;
+            }
+
+            .order-card {
+                padding: 0.75rem;
+            }
+        }
+
+        /* Scrollbar personalizada */
+        .status-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .status-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .status-body::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .status-body::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-color);
+        }
+
+        /* Data picker melhorado */
+        .date-picker-container {
+            position: relative;
+        }
+
+        .date-picker-container input {
+            padding-right: 2.5rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .date-picker-container::after {
+            content: '📅';
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Tela de Login -->
+    <div id="loginScreen">
+        <div class="card login-card">
+            <div class="card-body">
+                <h4 class="text-center mb-4">Login</h4>
+                <form id="loginForm" onsubmit="return fazerLogin(event)">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="senha" class="form-label">Senha</label>
+                        <input type="password" class="form-control" id="senha" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Entrar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard (inicialmente oculta) -->
+    <div id="dashboard" style="display: none;">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--primary-color);">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">Dashboard de Pedidos</a>
+                <div class="d-flex align-items-center">
+                    <div class="dropdown">
+                        <button class="btn btn-link text-white dropdown-toggle" type="button" id="profileDropdown" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i>
+                            <span id="userName">Usuário</span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end profile-dropdown">
+                            <div class="profile-header">
+                                <h6 class="mb-0" id="profileName">Nome do Usuário</h6>
+                                <small id="profileEmail">email@exemplo.com</small>
+                            </div>
+                            <div class="profile-body">
+                                <p class="mb-1"><strong>Função:</strong> <span id="profileRole">Atendente</span></p>
+                                <p class="mb-0"><strong>Último acesso:</strong> <span id="profileLastAccess">Hoje</span></p>
+                            </div>
+                            <div class="profile-footer">
+                                <button class="btn btn-danger btn-sm w-100" onclick="fazerLogout()">
+                                    <i class="bi bi-box-arrow-right me-1"></i>Sair
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Conteúdo da Dashboard -->
+        <div class="container-fluid p-3">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">Pedidos do Dia</h2>
+                <div class="date-picker-container">
+                    <input type="date" class="form-control" id="filtroData">
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="card summary-card bg-warning text-white">
+                        <div class="card-body">
+                            <h6 class="card-title">Pedidos Abertos</h6>
+                            <h2 class="display-6" id="resumoAbertos">0</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card summary-card bg-success text-white">
+                        <div class="card-body">
+                            <h6 class="card-title">Pedidos Entregues</h6>
+                            <h2 class="display-6" id="resumoEntregues">0</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card summary-card bg-primary text-white">
+                        <div class="card-body">
+                            <h6 class="card-title">Ticket Médio</h6>
+                            <h2 class="display-6" id="resumoTicket">R$ 0,00</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="status-column">
+                        <div class="status-header">
+                            <h5><i class="bi bi-circle-fill text-warning"></i> Em Aberto</h5>
+                        </div>
+                        <div class="status-body" id="listaAberto"></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="status-column">
+                        <div class="status-header">
+                            <h5><i class="bi bi-circle-fill text-primary"></i> Em Produção</h5>
+                        </div>
+                        <div class="status-body" id="listaProducao"></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="status-column">
+                        <div class="status-header">
+                            <h5><i class="bi bi-circle-fill text-success"></i> Em Entrega</h5>
+                        </div>
+                        <div class="status-body" id="listaEntrega"></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="status-column">
+                        <div class="status-header">
+                            <h5><i class="bi bi-circle-fill text-secondary"></i> Finalizados</h5>
+                        </div>
+                        <div class="status-body" id="listaFinalizado"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalhes -->
+    <div class="modal fade" id="modalPedido" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalhes do Pedido</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Número:</strong> <span id="detalheId"></span></p>
+                    <p><strong>Cliente:</strong> <span id="detalheCliente"></span></p>
+                    <p><strong>Telefone:</strong> <span id="detalheTelefone"></span></p>
+                    <p><strong>Endereço:</strong> <span id="detalheEndereco"></span></p>
+                    <p><strong>Itens:</strong></p>
+                    <ul id="detalheItens"></ul>
+                    <p><strong>Total:</strong> R$ <span id="detalheTotal"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Dados mockados para teste
+        const usuariosMock = [
+            {
+                email: "admin@exemplo.com",
+                senha: "123456",
+                nome: "Administrador",
+                funcao: "Administrador",
+                ultimoAcesso: "Hoje às 10:30"
+            },
+            {
+                email: "atendente@exemplo.com",
+                senha: "123456",
+                nome: "João Atendente",
+                funcao: "Atendente",
+                ultimoAcesso: "Hoje às 09:15"
+            }
+        ];
+
+        const pedidosMock = [
+            {
+                id: 1,
+                cliente: "João Silva",
+                telefone: "(11) 99999-9999",
+                endereco: "Rua A, 123",
+                itens: ["X-Burger", "Batata Frita", "Refrigerante"],
+                total: 45.90,
+                status: "aberto"
+            },
+            {
+                id: 2,
+                cliente: "Maria Santos",
+                telefone: "(11) 98888-8888",
+                endereco: "Rua B, 456",
+                itens: ["Pizza Margherita", "Coca-Cola"],
+                total: 65.00,
+                status: "producao"
+            },
+            {
+                id: 3,
+                cliente: "Pedro Oliveira",
+                telefone: "(11) 97777-7777",
+                endereco: "Rua C, 789",
+                itens: ["Combo 1", "Sobremesa"],
+                total: 55.50,
+                status: "entrega"
+            },
+            {
+                id: 4,
+                cliente: "Ana Costa",
+                telefone: "(11) 96666-6666",
+                endereco: "Rua D, 321",
+                itens: ["Lanche Especial", "Milk Shake"],
+                total: 75.00,
+                status: "finalizado"
+            }
+        ];
+
+        // Função para fazer login
+        function fazerLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+
+            const usuario = usuariosMock.find(u => u.email === email && u.senha === senha);
+            
+            if (usuario) {
+                // Salvar dados do usuário
+                localStorage.setItem('usuarioLogado', JSON.stringify(usuario));
+                
+                // Atualizar interface
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                
+                // Atualizar informações do perfil
+                atualizarPerfil(usuario);
+                
+                // Inicializar dashboard
+                document.getElementById('filtroData').valueAsDate = new Date();
+                atualizarListas();
+            } else {
+                alert('Email ou senha inválidos!');
+            }
+        }
+
+        // Função para fazer logout
+        function fazerLogout() {
+            localStorage.removeItem('usuarioLogado');
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('loginForm').reset();
+        }
+
+        // Função para atualizar informações do perfil
+        function atualizarPerfil(usuario) {
+            document.getElementById('userName').textContent = usuario.nome;
+            document.getElementById('profileName').textContent = usuario.nome;
+            document.getElementById('profileEmail').textContent = usuario.email;
+            document.getElementById('profileRole').textContent = usuario.funcao;
+            document.getElementById('profileLastAccess').textContent = usuario.ultimoAcesso;
+        }
+
+        // Verificar se usuário está logado ao carregar a página
+        window.onload = function() {
+            const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
+            if (usuarioLogado) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                atualizarPerfil(usuarioLogado);
+                document.getElementById('filtroData').valueAsDate = new Date();
+                atualizarListas();
+            }
+        }
+
+        // Função para formatar valor em reais
+        function formatarMoeda(valor) {
+            return valor.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            });
+        }
+
+        // Função para criar card de pedido
+        function criarCardPedido(pedido) {
+            const card = document.createElement('div');
+            card.className = `order-card status-${pedido.status}`;
+            
+            const data = new Date();
+            const hora = data.getHours().toString().padStart(2, '0');
+            const minutos = data.getMinutes().toString().padStart(2, '0');
+            
+            card.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1" style="cursor: pointer;">
+                        <div class="order-header">
+                            <span class="order-number">#${pedido.id}</span>
+                            <span class="order-time">${hora}:${minutos}</span>
+                        </div>
+                        <div class="order-customer">${pedido.cliente}</div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">${pedido.itens.length} itens</small>
+                            <span class="order-total">${formatarMoeda(pedido.total)}</span>
+                        </div>
+                    </div>
+                    ${pedido.status !== 'finalizado' ? `
+                        <button class="btn btn-sm btn-outline-primary ms-2" onclick="event.stopPropagation(); avancarStatus(${pedido.id})">
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+            
+            card.querySelector('.flex-grow-1').onclick = () => mostrarDetalhes(pedido);
+            
+            return card;
+        }
+
+        // Função para mostrar detalhes do pedido
+        function mostrarDetalhes(pedido) {
+            document.getElementById('detalheId').textContent = pedido.id;
+            document.getElementById('detalheCliente').textContent = pedido.cliente;
+            document.getElementById('detalheTelefone').textContent = pedido.telefone;
+            document.getElementById('detalheEndereco').textContent = pedido.endereco;
+            document.getElementById('detalheTotal').textContent = formatarMoeda(pedido.total);
+            
+            const itensList = document.getElementById('detalheItens');
+            itensList.innerHTML = pedido.itens.map(item => `<li>${item}</li>`).join('');
+            
+            new bootstrap.Modal(document.getElementById('modalPedido')).show();
+        }
+
+        // Função para avançar status do pedido
+        function avancarStatus(pedidoId) {
+            const pedido = pedidosMock.find(p => p.id === pedidoId);
+            if (!pedido) return;
+
+            const statusFlow = ['aberto', 'producao', 'entrega', 'finalizado'];
+            const currentIndex = statusFlow.indexOf(pedido.status);
+            if (currentIndex < statusFlow.length - 1) {
+                pedido.status = statusFlow[currentIndex + 1];
+                atualizarListas();
+            }
+        }
+
+        // Função para atualizar as listas
+        function atualizarListas() {
+            const listas = {
+                aberto: document.getElementById('listaAberto'),
+                producao: document.getElementById('listaProducao'),
+                entrega: document.getElementById('listaEntrega'),
+                finalizado: document.getElementById('listaFinalizado')
+            };
+
+            // Limpar listas
+            Object.values(listas).forEach(lista => lista.innerHTML = '');
+
+            // Preencher listas
+            pedidosMock.forEach(pedido => {
+                listas[pedido.status].appendChild(criarCardPedido(pedido));
+            });
+
+            // Atualizar resumo
+            document.getElementById('resumoAbertos').textContent = 
+                pedidosMock.filter(p => p.status === 'aberto').length;
+            document.getElementById('resumoEntregues').textContent = 
+                pedidosMock.filter(p => p.status === 'finalizado').length;
+            
+            const ticketMedio = pedidosMock.reduce((acc, p) => acc + p.total, 0) / pedidosMock.length;
+            document.getElementById('resumoTicket').textContent = formatarMoeda(ticketMedio);
+        }
+
+        // Adicionar novo pedido a cada 30 segundos para demonstração
+        setInterval(() => {
+            const novoPedido = {
+                id: pedidosMock.length + 1,
+                cliente: `Cliente ${pedidosMock.length + 1}`,
+                telefone: `(11) 9${Math.floor(Math.random() * 9000) + 1000}-${Math.floor(Math.random() * 9000) + 1000}`,
+                endereco: `Rua ${String.fromCharCode(65 + Math.floor(Math.random() * 26))}, ${Math.floor(Math.random() * 1000)}`,
+                itens: ['Item 1', 'Item 2', 'Item 3'],
+                total: Math.floor(Math.random() * 50) + 20,
+                status: 'aberto'
+            };
+            pedidosMock.push(novoPedido);
+            atualizarListas();
+        }, 30000);
+    </script>
+</body>
+</html> 
